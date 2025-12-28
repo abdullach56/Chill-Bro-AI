@@ -1,21 +1,25 @@
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve React build
-const __dirname = path.resolve();
+// Serve frontend
 app.use(express.static(path.join(__dirname, 'dist')));
 
-app.get('/api/chat', (req, res) => {
-  // ... tera existing API logic
+// API route
+app.post('/api/chat', (req, res) => {
+  // ... Gemini API call
 });
 
-// Catch-all route to serve React index.html
-app.get('*', (req, res) => {
+// Catch-all (React SPA)
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
