@@ -153,7 +153,16 @@ const App: React.FC = () => {
         config: { systemInstruction: SYSTEM_INSTRUCTION + "\n" + personaPrompt, tools: TOOLS }
       };
 
-      const raw = await fetch("/api/chat", {
+      // Fallback local proxy (kept for development):
+      // const raw = await fetch("/api/chat", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(requestBody),
+      // });
+
+      const raw = await fetch("https://chill-bro-ai.onrender.com/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

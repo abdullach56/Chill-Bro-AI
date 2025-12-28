@@ -1,47 +1,30 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-// ===== FIX FOR __dirname (ESM) =====
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Example /api/chat endpoint
+app.post('/api/chat', async (req, res) => {
+  const { contents } = req.body;
 
-// ===== Serve React build =====
-app.use(express.static(path.join(__dirname, "dist")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
-
-// ===== Gemini API route =====
-app.post("/api/chat", async (req, res) => {
-  try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
-        process.env.GEMINI_API_KEY,
+  // Simple echo logic (AI integration baad me add karna)
+  const lastMsg = contents && contents.length
+    ? contents[contents.length - 1].parts[0].text
+    : 'Hello!';
+    
+  res.json({
+    candidates: [
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(req.body),
+        content: { parts: [{ text: `Bhai reply: ${lastMsg}` }] }
       }
-    );
-
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Gemini API error" });
-  }
+    ]
+  });
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
