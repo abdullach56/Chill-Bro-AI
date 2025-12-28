@@ -1,0 +1,7 @@
+{
+  "name": "Chill Bro AI",
+  "description": "Your friendly college buddy AI for study help, social media trends, and automation.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
