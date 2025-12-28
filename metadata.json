@@ -1,7 +1,15 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07962a8 (Deploy-ready version with backend proxy)
 {
   "name": "Chill Bro AI",
   "description": "Your friendly college buddy AI for study help, social media trends, and automation.",
   "requestFramePermissions": [
     "microphone"
   ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 07962a8 (Deploy-ready version with backend proxy)

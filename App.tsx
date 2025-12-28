@@ -144,36 +144,45 @@ const App: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const ai = getGeminiClient();
       const personaPrompt = `Bro Persona: ${aiSettings.persona}. ${aiSettings.customInstruction}`;
       const history = messages.concat(userMsg).map(m => ({ role: m.role, parts: [{ text: m.content }] }));
 
-      const res = await ai.models.generateContent({
+      const requestBody = {
         model: 'gemini-3-flash-preview',
         contents: history,
         config: { systemInstruction: SYSTEM_INSTRUCTION + "\n" + personaPrompt, tools: TOOLS }
+      };
+
+      const raw = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
       });
+      const res: any = await raw.json();
 
       // Handle function calls if any
       if (res.functionCalls && res.functionCalls.length > 0) {
         for (const call of res.functionCalls) {
+          const args = call.args as any;
           const actionId = Math.random().toString(36).substr(2, 9);
-          const newAction: ToolAction = { id: actionId, name: call.name, args: call.args, status: 'pending', timestamp: Date.now() };
+          const newAction: ToolAction = { id: actionId, name: call.name, args: args, status: 'pending', timestamp: Date.now() };
           setActions(prev => [newAction, ...prev]);
 
           setTimeout(() => {
             setActions(prev => prev.map(a => a.id === actionId ? { ...a, status: 'completed' } : a));
             if (call.name === 'send_email') {
-              window.location.href = `mailto:${call.args.to}?subject=${encodeURIComponent(call.args.subject)}&body=${encodeURIComponent(call.args.body)}`;
+              window.location.href = `mailto:${args.to}?subject=${encodeURIComponent(args.subject)}&body=${encodeURIComponent(args.body)}`;
             } else if (call.name === 'send_whatsapp_message') {
-              const num = call.args.target.replace(/\D/g, '');
-              if (num.length >= 10) window.open(`https://wa.me/${num}?text=${encodeURIComponent(call.args.message)}`, '_blank');
+              const num = (args.target || '').replace(/\D/g, '');
+              if (num.length >= 10) window.open(`https://wa.me/${num}?text=${encodeURIComponent(args.message || '')}`, '_blank');
             }
           }, 800);
 
           const feedback = call.name === 'send_email' 
-            ? `📨 **Email Sorted!** Notes bhej raha hoon to **${call.args.to}**. Check kar le!`
-            : `📲 **WhatsApp Check!** Message ready for **${call.args.target}**. Opening WhatsApp...`;
+            ? `📨 **Email Sorted!** Notes bhej raha hoon to **${args.to}**. Check kar le!`
+            : `📲 **WhatsApp Check!** Message ready for **${args.target}**. Opening WhatsApp...`;
 
           setMessages(prev => [...prev, { role: MessageRole.MODEL, content: feedback, timestamp: Date.now(), isAction: true }]);
         }
