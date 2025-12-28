@@ -1,30 +1,25 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Example /api/chat endpoint
-app.post('/api/chat', async (req, res) => {
-  const { contents } = req.body;
+// Serve React build
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, 'dist')));
 
-  // Simple echo logic (AI integration baad me add karna)
-  const lastMsg = contents && contents.length
-    ? contents[contents.length - 1].parts[0].text
-    : 'Hello!';
-    
-  res.json({
-    candidates: [
-      {
-        content: { parts: [{ text: `Bhai reply: ${lastMsg}` }] }
-      }
-    ]
-  });
+app.get('/api/chat', (req, res) => {
+  // ... tera existing API logic
+});
+
+// Catch-all route to serve React index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log('Server running on port', PORT);
 });
